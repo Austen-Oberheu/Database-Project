@@ -122,6 +122,7 @@ class SQL(QMainWindow):
 			self.lastNameBox.insert(lastName)
 			self.paybox.insert(str(pay))
 			self.idBox.insert(str(id))
+
 	def update_click(self):
 		query = QSqlQuery()
 		error = QSqlError()
