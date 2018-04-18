@@ -94,9 +94,9 @@ class SQL(QMainWindow):
 	def on_click(self):
 		db = QSqlDatabase.addDatabase('QODBC')
 		db.setDatabaseName('DRIVER={SQL Server};SERVER=%s;DATABASE=%s;UID=%s;PWD=%s;'
-                        % ('b680061420741',
-                           'TEST',
-                           'test',
+                        % ('98.103.60.67,49172',
+                           'DamajjAuto',
+                           'damajjauto',
                            '12345'))
 		ok = db.open()
 		print(ok)
@@ -108,7 +108,7 @@ class SQL(QMainWindow):
 #Runs a query searching for a row that matches the first or last name, currently not sure how it would handle multiple rows returning		
 	def query_click(self):
 		query = QSqlQuery()
-		query.exec('SELECT First_Name, Last_Name, Salary, Employee_id FROM EMPLOYEE WHERE First_Name = \'{0}\' or Last_Name = \'{0}\' '.format(self.textbox.toPlainText()))
+		query.exec('SELECT first_name, last_name, bday, employee_num FROM employee WHERE first_name = \'{0}\' or last_name = \'{0}\' '.format(self.textbox.toPlainText()))
 		while (query.next()):
 			firstName = query.value(0)
 			lastName = query.value(1)
@@ -126,9 +126,9 @@ class SQL(QMainWindow):
 	def update_click(self):
 		query = QSqlQuery()
 		error = QSqlError()
-		query.exec('UPDATE EMPLOYEE' 
-			 ' SET First_Name = \'{0}\', Last_Name = \'{1}\', Salary = {2} '
-			'WHERE Employee_id = {3}'.format(self.firstNameBox.text(), self.lastNameBox.text(), int(self.paybox.text()), int(self.idBox.text())))
+		query.exec('UPDATE employee' 
+			 ' SET first_name = \'{0}\', last_Name = \'{1}\', bday = {2} '
+			'WHERE employee_num = {3}'.format(self.firstNameBox.text(), self.lastNameBox.text(), int(self.paybox.text()), int(self.idBox.text())))
 		
 
 if __name__ == '__main__':
