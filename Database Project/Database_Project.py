@@ -8,7 +8,6 @@ from PyQt5.QtGui import QIcon, QFont
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtSql import *
 
-
 class SQL(QMainWindow):
 
 	def __init__(self):
@@ -33,7 +32,7 @@ class SQL(QMainWindow):
 #Create the textbox for searches
 		self.textbox = QTextEdit(self)
 		self.textbox.move(20, 45)
-		self.textbox.resize(280, 180)
+		self.textbox.resize(280, 25)
 #Employee ID Box
 		self.idLabel = QLabel(self)
 		self.idLabel.setText('ID')
@@ -57,22 +56,49 @@ class SQL(QMainWindow):
 		self.lastNameBox.move(485, 45)
 		self.lastNameBox.resize(80, 20)
 #Create the box for returned results and the label that goes above them
-		self.paylabel = QLabel(self)
-		self.paylabel.setText('Date of Birth')
-		self.paylabel.move(575, 20)
-		self.paybox = QLineEdit(self)
-		self.paybox.move(575, 45)
-		self.paybox.resize(80, 20)
+		self.dobLabel = QLabel(self)
+		self.dobLabel.setText('Date of Birth')
+		self.dobLabel.move(575, 20)
+		self.dobbox = QLineEdit(self)
+		self.dobbox.move(575, 45)
+		self.dobbox.resize(80, 20)
+#Create the box for returned results and the label that goes above them
+		self.genderlabel = QLabel(self)
+		self.genderlabel.setText('Gender')
+		self.genderlabel.move(665, 20)
+		self.genderbox = QLineEdit(self)
+		self.genderbox.move(665, 45)
+		self.genderbox.resize(20, 20)
+#Create the box for returned results and the label that goes above them
+		self.doslable = QLabel(self)
+		self.doslable.setText('Start Date')
+		self.doslable.move(355, 75)
+		self.dosbox = QLineEdit(self)
+		self.dosbox.move(355, 100)
+		self.dosbox.resize(80, 20)
+#Create the box for returned results and the label that goes above them
+		self.deptlabel = QLabel(self)
+		self.deptlabel.setText('Department')
+		self.deptlabel.move(440, 75)
+		self.deptbox = QLineEdit(self)
+		self.deptbox.move(440, 100)
+		self.deptbox.resize(125, 20)
+		self.deptbox.setMaxLength(25) 
 #Create the run Query button 
 		self.queryButton = QPushButton('Run Query', self)
 		self.queryButton.resize(180, 20)
-		self.queryButton.move(20, 240)
-		self.queryButton.clicked.connect(self.query_click)		
+		self.queryButton.move(20, 80)
+		self.queryButton.clicked.connect(self.query_click)
 #Create the update button
 		self.queryButton = QPushButton('Update', self)
 		self.queryButton.resize(90, 20)
-		self.queryButton.move(550, 80)
+		self.queryButton.move(355, 140)
 		self.queryButton.clicked.connect(self.update_click)
+
+		self.updatelabel = QLabel(self)
+		self.updatelabel.setText('')
+		self.updatelabel.move(355, 160)
+
 #Exit from the menu
 		exitAct = QAction(QIcon('Exit.png'), '&Exit', self)
 		exitAct.setShortcut('Crtl+Q')
@@ -108,28 +134,45 @@ class SQL(QMainWindow):
 #Runs a query searching for a row that matches the first or last name, currently not sure how it would handle multiple rows returning		
 	def query_click(self):
 		query = QSqlQuery()
-		query.exec('SELECT first_name, last_name, bday, employee_num FROM employee WHERE first_name = \'{0}\' or last_name = \'{0}\' '.format(self.textbox.toPlainText()))
+		query.exec('SELECT first_name, last_name, bday, employee_num, gender, date_started, department.dept_name FROM employee LEFT JOIN department ON employee.dept_num = department.dept_num WHERE first_name = \'{0}\' or last_name = \'{0}\' '.format(self.textbox.toPlainText()))
 		while (query.next()):
 			firstName = query.value(0)
 			lastName = query.value(1)
-			pay = query.value(2)
+			dateOfBirth = query.value(2)
 			id = query.value(3)
+			gender = query.value(4)
+			startDate = query.value(5)
+			department = query.value(6)
 			self.firstNameBox.clear()
 			self.lastNameBox.clear()
-			self.paybox.clear()
+			self.dobbox.clear()
 			self.idBox.clear()
+			self.genderbox.clear()
+			self.dosbox.clear()
+			self.deptbox.clear()
 			self.firstNameBox.insert(firstName)
 			self.lastNameBox.insert(lastName)
-			self.paybox.insert(str(pay))
+			self.dobbox.insert(str(dateOfBirth))
 			self.idBox.insert(str(id))
+			self.genderbox.insert(str(gender))
+			self.dosbox.insert(str(startDate))
+			self.deptbox.insert(str(department))
 
 	def update_click(self):
 		query = QSqlQuery()
 		error = QSqlError()
-		query.exec('UPDATE employee' 
-			 ' SET first_name = \'{0}\', last_Name = \'{1}\', bday = {2} '
-			'WHERE employee_num = {3}'.format(self.firstNameBox.text(), self.lastNameBox.text(), int(self.paybox.text()), int(self.idBox.text())))
+		ok = query.exec('UPDATE e ' 
+			 'SET first_name = \'{0}\', last_Name = \'{1}\', bday = \'{2}\', employee_num = \'{3}\', gender = \'{4}\', date_started = \'{5}\' , department.dept_name = \'{6}\' '
+			'from employee e '
+			'inner join department d on '
+			'e.dept_num = d.dept_num '
+		'WHERE employee_num = {3}'.format(self.firstNameBox.text(), self.lastNameBox.text(), QDate(self.dobbox.text()), int(self.idBox.text()), self.genderbox.text(), self.dosbox.text(), self.deptbox.text()))
 		
+		if (ok == False):
+			self.updatelabel.setText('Update Failed')
+			print(error.databaseText())
+		else:
+			self.updatelabel.setText('Update Successful')
 
 if __name__ == '__main__':
 	app = QApplication(sys.argv)
