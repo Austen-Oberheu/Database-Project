@@ -58,7 +58,7 @@ class SQL(QMainWindow):
 		self.lastNameBox.resize(80, 20)
 #Create the box for returned results and the label that goes above them
 		self.paylabel = QLabel(self)
-		self.paylabel.setText('Pay')
+		self.paylabel.setText('Date of Birth')
 		self.paylabel.move(575, 20)
 		self.paybox = QLineEdit(self)
 		self.paybox.move(575, 45)
