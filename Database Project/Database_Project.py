@@ -12,6 +12,9 @@ class SQL(QMainWindow):
 
 	def __init__(self):
 		super().__init__()
+
+		db = QSqlDatabase
+
 		self.left = 100
 		self.top = 100
 		self.width = 800
@@ -115,19 +118,23 @@ class SQL(QMainWindow):
 		self.setWindowTitle('SQL App')
 		self.setWindowIcon(QIcon('web.png'))
 		self.show()
+
+	def closeEvent(self, event):
+		self.db.close()
+
 #Connects to the database with the credentials below when the button is clicked
 	@pyqtSlot()
 	def on_click(self):
-		db = QSqlDatabase.addDatabase('QODBC')
-		db.setDatabaseName('DRIVER={SQL Server};SERVER=%s;DATABASE=%s;UID=%s;PWD=%s;'
+		self.db = QSqlDatabase.addDatabase('QODBC')
+		self.db.setDatabaseName('DRIVER={SQL Server};SERVER=%s;DATABASE=%s;UID=%s;PWD=%s;'
                         % ('98.103.60.67,49172',
                            'DamajjAuto',
                            'damajjauto',
                            '12345'))
-		ok = db.open()
+		ok = self.db.open()
 		print(ok)
 		if(ok == False):
-			error = db.lastError()
+			error = self.db.lastError()
 			print(error)
 		else:
 			self.dbLabel.setText('Connected')
@@ -160,17 +167,15 @@ class SQL(QMainWindow):
 
 	def update_click(self):
 		query = QSqlQuery()
-		error = QSqlError()
 		ok = query.exec('UPDATE e ' 
-			 'SET first_name = \'{0}\', last_Name = \'{1}\', bday = \'{2}\', employee_num = \'{3}\', gender = \'{4}\', date_started = \'{5}\' , department.dept_name = \'{6}\' '
+			'SET first_name = \'{0}\', last_name = \'{1}\', bday = \'{2}\', employee_num = \'{3}\', gender = \'{4}\', date_started = \'{5}\' , dept_num = (SELECT dept_num FROM department WHERE dept_name = \'{6}\') '
 			'from employee e '
-			'inner join department d on '
-			'e.dept_num = d.dept_num '
-		'WHERE employee_num = {3}'.format(self.firstNameBox.text(), self.lastNameBox.text(), QDate(self.dobbox.text()), int(self.idBox.text()), self.genderbox.text(), self.dosbox.text(), self.deptbox.text()))
+			'WHERE employee_num = {3}'.format(self.firstNameBox.text(), self.lastNameBox.text(), self.dobbox.text(), int(self.idBox.text()), self.genderbox.text(), self.dosbox.text(), self.deptbox.text()))
 		
 		if (ok == False):
 			self.updatelabel.setText('Update Failed')
-			print(error.databaseText())
+			print(query.lastError().number())
+			print(query.lastError().databaseText())
 		else:
 			self.updatelabel.setText('Update Successful')
 
