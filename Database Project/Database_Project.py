@@ -141,7 +141,7 @@ class SQL(QMainWindow):
 #Runs a query searching for a row that matches the first or last name, currently not sure how it would handle multiple rows returning		
 	def query_click(self):
 		query = QSqlQuery()
-		query.exec('SELECT first_name, last_name, bday, employee_num, gender, date_started, department.dept_name FROM employee LEFT JOIN department ON employee.dept_num = department.dept_num WHERE first_name = \'{0}\' or last_name = \'{0}\' '.format(self.textbox.toPlainText()))
+		query.exec('SELECT first_name, last_name, bday, employee_num, gender, date_started, department.dept_name FROM employee LEFT JOIN department ON employee.dept_num = department.dept_num WHERE first_name = \'{0}\' or last_name = \'{0}\' or employee_num = \'{1}\' '.format(self.textbox.toPlainText(), int(self.textbox.toPlainText())))
 		while (query.next()):
 			firstName = query.value(0)
 			lastName = query.value(1)
