@@ -8,6 +8,25 @@ from PyQt5.QtGui import QIcon, QFont
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtSql import *
 
+
+
+		
+def is_number(s):
+	try:
+		float(s)
+		return True
+	except ValueError:
+		pass
+	try:
+		import unicodedata
+		unicodedata.numeric(s)
+		return True
+	except (TypeError, ValueError):
+		pass
+
+	return False
+
+
 class SQL(QMainWindow):
 
 	def __init__(self):
@@ -24,6 +43,7 @@ class SQL(QMainWindow):
 	def initUI(self):
 #Set window size and position
 		self.setGeometry(self.left, self.top, self.width, self.height)
+
 #Create the connect to database button
 		self.dbLabel = QLabel(self)
 		self.dbLabel.setText('Not Connected')
@@ -98,6 +118,11 @@ class SQL(QMainWindow):
 		self.queryButton.move(355, 140)
 		self.queryButton.clicked.connect(self.update_click)
 
+		self.queryButton = QPushButton('Delete', self)
+		self.queryButton.resize(90, 20)
+		self.queryButton.move(455, 140)
+		self.queryButton.clicked.connect(self.deleteEvent)
+
 		self.updatelabel = QLabel(self)
 		self.updatelabel.setText('')
 		self.updatelabel.move(355, 160)
@@ -122,8 +147,31 @@ class SQL(QMainWindow):
 	def closeEvent(self, event):
 		self.db.close()
 
+
 #Connects to the database with the credentials below when the button is clicked
 	@pyqtSlot()
+
+	def deleteEvent(self):
+		choice = QMessageBox.question(self, 'Extract!',
+                                            "Delete the Entry?",
+                                            QMessageBox.Yes | QMessageBox.No)
+		if (choice == QMessageBox.Yes):
+			query = QSqlQuery()
+			ok = query.exec('DELETE FROM employee WHERE employee_num = {0}'.format(int(self.idBox.text())))
+			if (ok):
+				self.firstNameBox.clear()
+				self.lastNameBox.clear()
+				self.dobbox.clear()
+				self.idBox.clear()
+				self.genderbox.clear()
+				self.dosbox.clear()
+				self.deptbox.clear()
+				self.updatelabel.setText('Query Successful')
+			else:
+				self.updatelabel.setText('Query Failed')
+				print(query.lastError().number())
+				print(query.lastError().databaseText())
+
 	def on_click(self):
 		self.db = QSqlDatabase.addDatabase('QODBC')
 		self.db.setDatabaseName('DRIVER={SQL Server};SERVER=%s;DATABASE=%s;UID=%s;PWD=%s;'
@@ -141,7 +189,12 @@ class SQL(QMainWindow):
 #Runs a query searching for a row that matches the first or last name, currently not sure how it would handle multiple rows returning		
 	def query_click(self):
 		query = QSqlQuery()
-		query.exec('SELECT first_name, last_name, bday, employee_num, gender, date_started, department.dept_name FROM employee LEFT JOIN department ON employee.dept_num = department.dept_num WHERE first_name = \'{0}\' or last_name = \'{0}\' or employee_num = \'{1}\' '.format(self.textbox.toPlainText(), int(self.textbox.toPlainText())))
+		queryInput = self.textbox.toPlainText()
+		if(is_number(queryInput) == True):
+			ok = query.exec('SELECT first_name, last_name, bday, employee_num, gender, date_started, department.dept_name FROM employee LEFT JOIN department ON employee.dept_num = department.dept_num WHERE employee_num = \'{0}\' '.format(queryInput))
+		else:
+			ok = query.exec('SELECT first_name, last_name, bday, employee_num, gender, date_started, department.dept_name FROM employee LEFT JOIN department ON employee.dept_num = department.dept_num WHERE first_name = \'{0}\' or last_name = \'{0}\' '.format(queryInput))
+		
 		while (query.next()):
 			firstName = query.value(0)
 			lastName = query.value(1)
@@ -164,6 +217,12 @@ class SQL(QMainWindow):
 			self.genderbox.insert(str(gender))
 			self.dosbox.insert(str(startDate))
 			self.deptbox.insert(str(department))
+		if (ok == False):
+			self.updatelabel.setText('Query Failed')
+			print(query.lastError().number())
+			print(query.lastError().databaseText())
+		else:
+			self.updatelabel.setText('Query Successful')
 
 	def update_click(self):
 		query = QSqlQuery()
@@ -179,8 +238,11 @@ class SQL(QMainWindow):
 		else:
 			self.updatelabel.setText('Update Successful')
 
+
+
 if __name__ == '__main__':
 	app = QApplication(sys.argv)
 	ex = SQL()
 	
 	sys.exit(app.exec_())  
+
