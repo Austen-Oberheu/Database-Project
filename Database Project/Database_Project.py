@@ -3,14 +3,12 @@ import PyQt5
 from PyQt5.QtWidgets import (QApplication, qApp, QAction, QDesktopWidget, QToolTip, 
 							 QPushButton, QMessageBox, QMainWindow, QMenu, QTextEdit,
 							 QHBoxLayout, QVBoxLayout, QLineEdit, QTableWidget, 
-							 QTableWidgetItem, QLabel)
+							 QTableWidgetItem, QLabel, QWidget, QComboBox)
 from PyQt5.QtGui import QIcon, QFont
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtSql import *
 
-
-
-		
+	
 def is_number(s):
 	try:
 		float(s)
@@ -26,13 +24,103 @@ def is_number(s):
 
 	return False
 
+class CreateWindow(QWidget):
+    
+	def __init__(self):
+		super().__init__()
+
+		self.initUI()
+
+
+	def initUI(self):
+		self.setGeometry(300, 300, 600, 300)
+		self.setWindowTitle('Add Employee')
+		self.idLabel = QLabel(self)
+		self.idLabel.setText('ID')
+		self.idLabel.move(25, 20)
+		self.idBox = QLineEdit(self)
+		self.idBox.move(25, 45)
+		self.idBox.resize(40, 20)
+		self.idBox.setReadOnly(True)
+
+		self.firstNameLable = QLabel(self)
+		self.firstNameLable.setText('First Name')
+		self.firstNameLable.move(125, 20)
+		self.firstNameBox = QLineEdit(self)
+		self.firstNameBox.move(125, 45)
+		self.firstNameBox.resize(80, 20)
+		#Create the box for Last Name results
+		self.lastNameLable = QLabel(self)
+		self.lastNameLable.setText('Last Name')
+		self.lastNameLable.move(225, 20)
+		self.lastNameBox = QLineEdit(self)
+		self.lastNameBox.move(225, 45)
+		self.lastNameBox.resize(80, 20)
+		#Create the box for returned results and the label that goes above them
+		self.dobLabel = QLabel(self)
+		self.dobLabel.setText('Date of Birth')
+		self.dobLabel.move(325, 20)
+		self.dobbox = QLineEdit(self)
+		self.dobbox.move(325, 45)
+		self.dobbox.resize(80, 20)
+		#Create the box for returned results and the label that goes above them
+		self.genderlabel = QLabel(self)
+		self.genderlabel.setText('Gender')
+		self.genderlabel.move(425, 20)
+		self.genderbox = QLineEdit(self)
+		self.genderbox.move(425, 45)
+		self.genderbox.resize(20, 20)
+		#Create the box for returned results and the label that goes above them
+		self.doslable = QLabel(self)
+		self.doslable.setText('Start Date')
+		self.doslable.move(25, 75)
+		self.dosbox = QLineEdit(self)
+		self.dosbox.move(25, 100)
+		self.dosbox.resize(80, 20)
+		#Create the box for returned results and the label that goes above them
+		self.deptlabel = QLabel(self)
+		self.deptlabel.setText('Department')
+		self.deptlabel.move(125, 75)
+		#self.deptbox = QLineEdit(self)
+		#self.deptbox.move(125, 100)
+		#self.deptbox.resize(125, 20)
+		#self.deptbox.setMaxLength(25)
+
+		self.deptbox = QComboBox(self)
+		self.deptbox.move(125, 100)
+		self.deptbox.resize(125, 20)
+		self.deptbox.addItem('Production', 3)
+		self.deptbox.addItem('Sales', 4)
+		self.deptbox.addItem('Human Resources', 5)
+		self.deptbox.addItem('Warehouse', 6)
+		self.deptbox.addItem('IT', 7)
+		self.deptbox.activated.connect(self.sliderEvent)
+		
+		self.show()
+
+	@pyqtSlot()
+
+	def sliderEvent(self):
+		query = QSqlQuery()
+		ok = query.exec('SELECT employee_num FROM employee LEFT JOIN department ON employee.dept_num = department.dept_num WHERE dept_name = \'{0}\' '.format(str(self.deptbox.currentText())))
+		
+		while (query.next()):
+			id = query.value(0)
+		self.idBox.clear()
+		self.idBox.insert(str(int(id)+1))
+
+		if (ok == False):
+			print(query.lastError().number())
+			print(query.lastError().databaseText())
+			
+			
 
 class SQL(QMainWindow):
 
 	def __init__(self):
 		super().__init__()
 
-		db = QSqlDatabase
+		
 
 		self.left = 100
 		self.top = 100
@@ -123,6 +211,11 @@ class SQL(QMainWindow):
 		self.queryButton.move(455, 140)
 		self.queryButton.clicked.connect(self.deleteEvent)
 
+		self.addButton = QPushButton('Add', self)
+		self.addButton.resize(90, 20)
+		self.addButton.move(555, 140)
+		self.addButton.clicked.connect(self.addEvent)
+
 		self.updatelabel = QLabel(self)
 		self.updatelabel.setText('')
 		self.updatelabel.move(355, 160)
@@ -171,6 +264,9 @@ class SQL(QMainWindow):
 				self.updatelabel.setText('Query Failed')
 				print(query.lastError().number())
 				print(query.lastError().databaseText())
+
+	def addEvent(self):
+		self.window = CreateWindow()
 
 	def on_click(self):
 		self.db = QSqlDatabase.addDatabase('QODBC')
@@ -241,6 +337,7 @@ class SQL(QMainWindow):
 
 
 if __name__ == '__main__':
+	db = QSqlDatabase
 	app = QApplication(sys.argv)
 	ex = SQL()
 	
