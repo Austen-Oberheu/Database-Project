@@ -3,9 +3,9 @@ import PyQt5
 from PyQt5.QtWidgets import (QApplication, qApp, QAction, QDesktopWidget, QToolTip, 
 							 QPushButton, QMessageBox, QMainWindow, QMenu, QTextEdit,
 							 QHBoxLayout, QVBoxLayout, QLineEdit, QTableWidget, 
-							 QTableWidgetItem, QLabel, QWidget, QComboBox)
+							 QTableWidgetItem, QLabel, QWidget, QComboBox, QDateEdit)
 from PyQt5.QtGui import QIcon, QFont
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, QDate
 from PyQt5.QtSql import *
 
 	
@@ -35,59 +35,13 @@ class CreateWindow(QWidget):
 	def initUI(self):
 		self.setGeometry(300, 300, 600, 300)
 		self.setWindowTitle('Add Employee')
-		self.idLabel = QLabel(self)
-		self.idLabel.setText('ID')
-		self.idLabel.move(25, 20)
-		self.idBox = QLineEdit(self)
-		self.idBox.move(25, 45)
-		self.idBox.resize(40, 20)
-		self.idBox.setReadOnly(True)
 
-		self.firstNameLable = QLabel(self)
-		self.firstNameLable.setText('First Name')
-		self.firstNameLable.move(125, 20)
-		self.firstNameBox = QLineEdit(self)
-		self.firstNameBox.move(125, 45)
-		self.firstNameBox.resize(80, 20)
-		#Create the box for Last Name results
-		self.lastNameLable = QLabel(self)
-		self.lastNameLable.setText('Last Name')
-		self.lastNameLable.move(225, 20)
-		self.lastNameBox = QLineEdit(self)
-		self.lastNameBox.move(225, 45)
-		self.lastNameBox.resize(80, 20)
-		#Create the box for returned results and the label that goes above them
-		self.dobLabel = QLabel(self)
-		self.dobLabel.setText('Date of Birth')
-		self.dobLabel.move(325, 20)
-		self.dobbox = QLineEdit(self)
-		self.dobbox.move(325, 45)
-		self.dobbox.resize(80, 20)
-		#Create the box for returned results and the label that goes above them
-		self.genderlabel = QLabel(self)
-		self.genderlabel.setText('Gender')
-		self.genderlabel.move(425, 20)
-		self.genderbox = QLineEdit(self)
-		self.genderbox.move(425, 45)
-		self.genderbox.resize(20, 20)
-		#Create the box for returned results and the label that goes above them
-		self.doslable = QLabel(self)
-		self.doslable.setText('Start Date')
-		self.doslable.move(25, 75)
-		self.dosbox = QLineEdit(self)
-		self.dosbox.move(25, 100)
-		self.dosbox.resize(80, 20)
-		#Create the box for returned results and the label that goes above them
 		self.deptlabel = QLabel(self)
 		self.deptlabel.setText('Department')
-		self.deptlabel.move(125, 75)
-		#self.deptbox = QLineEdit(self)
-		#self.deptbox.move(125, 100)
-		#self.deptbox.resize(125, 20)
-		#self.deptbox.setMaxLength(25)
-
+		self.deptlabel.move(25, 20)
+		
 		self.deptbox = QComboBox(self)
-		self.deptbox.move(125, 100)
+		self.deptbox.move(25, 45)
 		self.deptbox.resize(125, 20)
 		self.deptbox.addItem('Production', 3)
 		self.deptbox.addItem('Sales', 4)
@@ -95,6 +49,63 @@ class CreateWindow(QWidget):
 		self.deptbox.addItem('Warehouse', 6)
 		self.deptbox.addItem('IT', 7)
 		self.deptbox.activated.connect(self.sliderEvent)
+
+		self.idLabel = QLabel(self)
+		self.idLabel.setText('ID')
+		self.idLabel.move(165, 20)
+		self.idBox = QLineEdit(self)
+		self.idBox.move(165, 45)
+		self.idBox.resize(40, 20)
+		self.idBox.setReadOnly(True)
+
+		self.firstNameLable = QLabel(self)
+		self.firstNameLable.setText('First Name')
+		self.firstNameLable.move(215, 20)
+		self.firstNameBox = QLineEdit(self)
+		self.firstNameBox.move(215, 45)
+		self.firstNameBox.resize(80, 20)
+		#Create the box for Last Name results
+		self.lastNameLable = QLabel(self)
+		self.lastNameLable.setText('Last Name')
+		self.lastNameLable.move(315, 20)
+		self.lastNameBox = QLineEdit(self)
+		self.lastNameBox.move(315, 45)
+		self.lastNameBox.resize(80, 20)
+		#Create the box for returned results and the label that goes above them
+		self.dobLabel = QLabel(self)
+		self.dobLabel.setText('Date of Birth')
+		self.dobLabel.move(415, 20)
+		self.dobbox = QDateEdit(QDate.currentDate(), self)
+		self.dobbox.move(415, 45)
+		self.dobbox.resize(80, 20)
+		#Create the box for returned results and the label that goes above them
+		self.genderlabel = QLabel(self)
+		self.genderlabel.setText('Gender')
+		self.genderlabel.move(515, 20)
+		self.genderbox = QLineEdit(self)
+		self.genderbox.move(515, 45)
+		self.genderbox.resize(20, 20)
+		#Create the box for returned results and the label that goes above them
+		self.doslable = QLabel(self)
+		self.doslable.setText('Start Date')
+		self.doslable.move(25, 75)
+		self.dosbox = QDateEdit(QDate.currentDate(), self)
+		self.dosbox.move(25, 100)
+
+		self.dbLabel = QLabel(self)
+		self.dbLabel.setText('						')
+		self.dbLabel.move(165, 155)		
+		self.button = QPushButton('Create Employee', self)
+		self.button.resize(120, 20)
+		self.button.move(25, 150)
+		self.button.clicked.connect(self.create_click)
+		#Create the box for returned results and the label that goes above them
+		
+		#self.deptbox = QLineEdit(self)
+		#self.deptbox.move(125, 100)
+		#self.deptbox.resize(125, 20)
+		#self.deptbox.setMaxLength(25)
+
 		
 		self.show()
 
@@ -112,7 +123,20 @@ class CreateWindow(QWidget):
 		if (ok == False):
 			print(query.lastError().number())
 			print(query.lastError().databaseText())
-			
+	
+	def create_click(self):
+		query = QSqlQuery()
+		ok = query.exec('INSERT INTO employee ' 
+			'VALUES ({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', {6}, \'{7}\')'
+			.format(int(self.idBox.text()), str(self.dobbox.date().toString("yyyy-MM-dd")), self.firstNameBox.text(), self.lastNameBox.text(), self.genderbox.text(), str(self.dosbox.date().toString("yyyy-MM-dd")), self.deptbox.currentData(), 'Employee'))
+		
+		if (ok == False):
+			self.dbLabel.setText('Create Employee Failed')
+			print(query.lastQuery())
+			print(query.lastError().number())
+			print(query.lastError().databaseText())
+		else:
+			self.dbLabel.setText('Create Employee Successful')
 			
 
 class SQL(QMainWindow):
